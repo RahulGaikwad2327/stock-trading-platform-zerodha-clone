@@ -264,6 +264,8 @@ code {
   height: 20px;
 }
 
+.brand-mark { width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: #387ed1; background: #eef5ff; font-size: 18px; font-weight: 700; }
+
 .menus {
   display: flex;
   align-items: center;
@@ -338,6 +340,11 @@ hr {
   cursor: pointer;
   color: rgb(223, 91, 43);
 }
+
+.profile { position: relative; }
+.account-menu { position: absolute; z-index: 20; right: 0; top: 42px; min-width: 190px; display: grid; gap: 9px; padding: 14px; background: #fff; border: 1px solid #e2e5e9; box-shadow: 0 8px 24px #0002; border-radius: 5px; }
+.account-menu small { color: #737d8c; font-size: 12px; }
+.account-menu button { border: 0; border-top: 1px solid #eee; padding: 10px 0 0; text-align: left; background: transparent; color: #c44435; cursor: pointer; }
 
 .orders {
   width: 100%;

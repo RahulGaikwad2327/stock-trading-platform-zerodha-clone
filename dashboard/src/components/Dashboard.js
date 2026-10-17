@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 import Apps from "./Apps";
 import Funds from "./Funds";
@@ -25,6 +25,7 @@ const Dashboard = () => {
           <Route path="/positions" element={<Positions />} />
           <Route path="/funds" element={<Funds />} />
           <Route path="/apps" element={<Apps />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
     </div>

@@ -1,11 +1,28 @@
-import React from "react";
-
-import { positions } from "../data/data";
+import React, { useEffect, useState } from "react";
+import api from "../api";
 
 const Positions = () => {
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+    api.get("/allPositions")
+      .then(({ data }) => { if (isMounted) setPositions(Array.isArray(data) ? data : []); })
+      .catch((requestError) => {
+        console.error("Could not load positions:", requestError);
+        if (isMounted) setError("Positions could not be loaded. Check your API connection and try again.");
+      })
+      .finally(() => { if (isMounted) setLoading(false); });
+    return () => { isMounted = false; };
+  }, []);
+
   return (
     <>
       <h3 className="title">Positions ({positions.length})</h3>
+      {loading && <p role="status">Loading positions…</p>}
+      {error && <p role="alert">{error}</p>}
 
       <div className="order-table">
         <table>
@@ -26,7 +43,7 @@ const Positions = () => {
             const dayClass = stock.isLoss ? "loss" : "profit";
 
             return (
-              <tr key={index}>
+              <tr key={stock._id || `${stock.name}-${index}`}>
                 <td>{stock.product}</td>
                 <td>{stock.name}</td>
                 <td>{stock.qty}</td>

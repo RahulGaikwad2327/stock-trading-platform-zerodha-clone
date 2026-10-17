@@ -1,7 +1,5 @@
 import React, { useState, useContext } from "react";
 
-import axios from "axios";
-
 import GeneralContext from "./GeneralContext";
 
 import { Tooltip, Grow } from "@mui/material";
@@ -76,11 +74,11 @@ export default WatchList;
 const WatchListItem = ({ stock }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
 
-  const handleMouseEnter = (e) => {
+  const handleMouseEnter = () => {
     setShowWatchlistActions(true);
   };
 
-  const handleMouseLeave = (e) => {
+  const handleMouseLeave = () => {
     setShowWatchlistActions(false);
   };
 

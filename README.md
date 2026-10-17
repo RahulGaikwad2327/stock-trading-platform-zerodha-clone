@@ -1,18 +1,47 @@
-# Zerodha clone
+﻿# Zerodha clone demo
+
+This project contains a React landing site (`frontend`), a React trading dashboard (`dashboard`), and an Express/MongoDB API (`backend`). The dashboard has email/password, Google, and Apple sign-in, server-side role checks, and an Apps page linking to official Zerodha products.
+
+This is an independent demo, not a Zerodha product or brokerage. Holdings and positions are shared sample data; orders are associated with the signed-in user. No real trading or Zerodha account connection is performed.
 
 ## Run locally
 
-1. Copy `backend/.env.example` to `backend/.env` and set `MONGO_URL` to your MongoDB connection string.
-2. In `backend`, run `npm install` once and `npm run dev` to start the API on port 3002.
-3. Copy `dashboard/.env.example` to `dashboard/.env` if you need a non-default API URL. The default is `http://localhost:3002`.
-4. In `dashboard`, run `npm install` once and `npm start` to start the dashboard on port 3000.
+1. Copy `backend/.env.example` to `backend/.env`; set `MONGO_URL` and a random `SESSION_SECRET` of at least 32 characters. Add OAuth provider values as described below.
+2. Run `npm install` and `npm run dev` from `backend`.
+3. Copy `dashboard/.env.example` to `dashboard/.env`. In `dashboard`, run `npm install` and `npm start`.
+4. Optionally run `frontend` separately on port 3001 for the marketing site.
 
-The API health endpoint is `GET /health`. Holdings are available at `GET /allHoldings` (the old `/allHolding` path remains supported), positions at `GET /allPositions`, and orders can be submitted to `POST /newOrder`.
+The API health check is `GET /health`. Auth endpoints live under `/auth`. Protected dashboard API requests use an HttpOnly session cookie.
 
-## Deploy
+## OAuth setup
 
-- Deploy `backend` as a Node service using `npm install` as the install command and `npm start` as the start command. Configure `MONGO_URL`, `PORT` if required by the host, and `CLIENT_ORIGIN` as a comma-separated list of the exact deployed frontend origins, including `https://`.
-- Deploy `dashboard` as a static React app using `npm install` and `npm run build`. Set `REACT_APP_API_URL` to the deployed backend origin (for example, `https://api.example.com`) before building. The API must allow the dashboard origin through `CLIENT_ORIGIN`.
-- Keep `.env` files and database credentials in the hosting provider's secret environment settings. Do not commit them.
+Email/password login works without an OAuth provider. Passwords must be at least 12 characters. For Google, create a Google OAuth Web client and set its client ID in both `GOOGLE_CLIENT_ID` (`backend/.env`) and `REACT_APP_GOOGLE_CLIENT_ID` (`dashboard/.env`). Add `http://localhost:3000` and your deployed dashboard origin as authorized JavaScript origins.
 
-The landing site in `frontend` is a separate React app and can be deployed as a static site using `npm install` and `npm run build`.
+For Apple, configure Sign in with Apple for a Services ID and website domain. Set the Services ID in `APPLE_CLIENT_ID` and `REACT_APP_APPLE_CLIENT_ID`. Apple requires a verified HTTPS domain and registered return URL; configure the deployed dashboard origin and `/login` as the return URL. Apple sign-in will not work on localhost unless Apple accepts a configured development domain.
+
+Set `ADMIN_EMAILS` to a comma-separated list of trusted email addresses. Matching users receive the admin role on account creation; `/auth/admin/users` is admin-only.
+
+## Deploy on Vercel
+
+This monorepo has three deployable projects. Import the same GitHub repository three times in Vercel and set each project's Root Directory:
+
+1. API: Root Directory backend. Vercel detects the Express app exported from index.js. Set MONGO_URL, a random SESSION_SECRET of at least 32 characters, SESSION_COOKIE_SAME_SITE=none, CLIENT_ORIGIN (the dashboard's exact HTTPS Vercel origin), GOOGLE_CLIENT_ID, APPLE_CLIENT_ID, and optionally ADMIN_EMAILS.
+2. Dashboard: Root Directory dashboard, Create React App framework. Set REACT_APP_API_URL to the API project's full HTTPS origin, plus REACT_APP_GOOGLE_CLIENT_ID and REACT_APP_APPLE_CLIENT_ID. The Vercel config in this directory rewrites deep links such as /login to the React app.
+3. Landing site: Root Directory frontend, Create React App framework. Set REACT_APP_DASHBOARD_URL to the dashboard project's full HTTPS URL. Its Vercel config enables client-side routes.
+
+Deploy the API first, then the dashboard. Add the dashboard's assigned production origin to the API's CLIENT_ORIGIN, then redeploy the API. Deploy the landing site last. In Google OAuth, add the dashboard origin as an authorized JavaScript origin. In Apple Sign in with Apple, configure the dashboard domain and https://<dashboard-domain>/login return URL. Redeploy the dashboard after changing its OAuth client IDs because Create React App embeds those public IDs at build time.
+
+The API and dashboard use separate Vercel origins, so the API session cookie must be SameSite=None; Secure; the backend applies Secure automatically in production. Browser privacy settings that block third-party cookies can still interfere with cross-origin sessions. A shared custom site domain with an API proxy avoids that browser limitation.
+
+Vercel can connect each project to the same GitHub repository and deploy it on pushes. Vercel account access is required to create the projects and enter secrets.
+
+## Deploy on Render
+
+1. Push this repository to GitHub and create a Render Blueprint from its root `render.yaml`.
+2. Set the prompted `MONGO_URL`, `GOOGLE_CLIENT_ID`, and `APPLE_CLIENT_ID` values. `SESSION_SECRET` is generated by the Blueprint. Set `ADMIN_EMAILS` if an admin account is needed.
+3. Set the Google and Apple OAuth website origins/return URLs to the `zerodha-clone-platform` URL Render assigns. Render uses the provider client IDs as React build values too.
+4. Redeploy after changing OAuth client IDs or redirect settings so the frontend bundle uses the updated values.
+
+The `zerodha-clone-platform` Node service builds the dashboard and serves it from the same origin as the API, including SPA deep links. `zerodha-clone-landing` is a separate static site that points to the platform URL.
+
+Keep `.env` files and database credentials out of GitHub. The repository `.gitignore` excludes them.

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 
 import { Link } from "react-router-dom";
+import { useAuth } from "../auth/AuthContext";
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(0);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
@@ -19,7 +21,7 @@ const Menu = () => {
 
   return (
     <div className="menu-container">
-      <img src="logo.png" style={{ width: "50px" }} />
+      <span className="brand-mark" aria-label="Zerodha demo">Z</span>
       <div className="menus">
         <ul>
           <li>
@@ -91,8 +93,9 @@ const Menu = () => {
         </ul>
         <hr />
         <div className="profile" onClick={handleProfileClick}>
-          <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
+          <div className="avatar">{(user?.name || user?.email || "U").slice(0, 2).toUpperCase()}</div>
+          <p className="username">{user?.name || user?.email || "Account"}</p>
+          {isProfileDropdownOpen && <div className="account-menu"><small>{user?.email}</small>{user?.role === "admin" && <small>Admin</small>}<button onClick={(event) => { event.stopPropagation(); signOut(); }}>Sign out</button></div>}
         </div>
       </div>
     </div>
