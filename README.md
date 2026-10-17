@@ -1,4 +1,7 @@
 ﻿# Zerodha clone demo
+ Live Demo: https://stock-trading-platform-zerodha-clone-git-95c52f-rahul-gaikwad1.vercel.app/
+ <img width="1599" height="819" alt="image" src="https://github.com/user-attachments/assets/e856c663-d7ab-48e1-bfa2-5b5395c88099" />
+
 
 This project contains a React landing site (`frontend`), a React trading dashboard (`dashboard`), and an Express/MongoDB API (`backend`). The dashboard has email/password, Google, and Apple sign-in, server-side role checks, and an Apps page linking to official Zerodha products.
 
